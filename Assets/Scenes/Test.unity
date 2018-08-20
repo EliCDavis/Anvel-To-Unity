@@ -308,6 +308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a8dfc880a347d49a4854afc6fd15a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  lidarSensorName: API 3D Lidar-5
 --- !u!81 &696701293
 AudioListener:
   m_ObjectHideFlags: 0
@@ -368,8 +369,8 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 696701291}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: -0.2636247, y: 0.6035032, z: -0.22119209, w: -0.7192774}
+  m_LocalPosition: {x: 151.3258, y: 153.85829, z: 25.960648}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

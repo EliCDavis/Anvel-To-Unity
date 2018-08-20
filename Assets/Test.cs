@@ -80,7 +80,6 @@ namespace CAVS
             timeSlice = .2f;
 
             Render();
-            //StartCoroutine(PollLidarPoints());
             new Thread(PollLidarPoints).Start();
         }
 
@@ -107,7 +106,6 @@ namespace CAVS
                     };
                 }
                 particles = newParticles;
-               // yield return null;
             }
         }
 
@@ -116,7 +114,6 @@ namespace CAVS
             var toRender = particles;
             if (toRender.Length > 0)
             {
-                //particleSystem.Clear();
                 particleSystem.SetParticles(toRender, toRender.Length);
             }
         }
