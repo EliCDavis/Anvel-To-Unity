@@ -8,7 +8,7 @@ namespace CAVS.Anvel.Vehicle
 {
     public static class VehicleLoader
     {
-        public static List<TimeEntry> LoadVehicleData(string filePath)
+        public static TimeEntry[] LoadVehicleData(string filePath)
         {
 
             bool eatingHeader = true;
@@ -66,7 +66,7 @@ namespace CAVS.Anvel.Vehicle
 
             }
 
-			return timeEntries;
+			return timeEntries.ToArray();
         }
 
         private static TransformEntry ParseEntry(string[] entry)

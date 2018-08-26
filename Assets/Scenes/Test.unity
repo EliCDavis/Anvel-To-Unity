@@ -308,7 +308,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a8dfc880a347d49a4854afc6fd15a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lidarSensorName: API 3D Lidar-5
+  lidarSensorName: illlllllllllllllllllllllllllllllllllllllllll
+  vehicleName: 
 --- !u!81 &696701293
 AudioListener:
   m_ObjectHideFlags: 0
