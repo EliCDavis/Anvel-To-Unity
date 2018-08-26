@@ -63,23 +63,25 @@ namespace CAVS.Anvel
                 {
                     var lidarPoints = anvelConnection.GetLidarPoints(lidarSensor.ObjectKey, 0);
                     var vehiclePosition = anvelConnection.GetPoseAbs(vehicle.ObjectKey).Position;
-                    Debug.Log(lidarPoints.HasScans);
-                    var newParticles = new ParticleSystem.Particle[lidarPoints.Points.Count];
-                    for (int i = 0; i < lidarPoints.Points.Count; i++)
+                    if(lidarPoints.HasScans)
                     {
-                        newParticles[i] = new ParticleSystem.Particle
+                        var newParticles = new ParticleSystem.Particle[lidarPoints.Points.Count];
+                        for (int i = 0; i < lidarPoints.Points.Count; i++)
                         {
-                            remainingLifetime = float.MaxValue,
-                            position = new Vector3(
-                                (float)(lidarPoints.Points[i].Y - vehiclePosition.Y),
-                                (float)(lidarPoints.Points[i].Z - vehiclePosition.Z),
-                                (float)(lidarPoints.Points[i].X - vehiclePosition.X)
-                            ),
-                            startSize = 1f,
-                            startColor = Color.white
-                        };
+                            newParticles[i] = new ParticleSystem.Particle
+                            {
+                                remainingLifetime = float.MaxValue,
+                                position = new Vector3(
+                                    (float)(lidarPoints.Points[i].Y - vehiclePosition.Y),
+                                    (float)(lidarPoints.Points[i].Z - vehiclePosition.Z),
+                                    (float)(lidarPoints.Points[i].X - vehiclePosition.X)
+                                ),
+                                startSize = 1f,
+                                startColor = Color.white
+                            };
+                        }
+                        particles = newParticles;
                     }
-                    particles = newParticles;
                 }
             }
             catch (AnvelException e)
