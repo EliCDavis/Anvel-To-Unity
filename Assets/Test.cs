@@ -18,6 +18,11 @@ namespace CAVS
         [SerializeField]
         private string vehicleName;
 
+        [SerializeField]
+        private GameObject carRepresentation;
+
+        LiveDisplayBehavior liveDisplayBehavior;
+
         // Use this for initialization
         void Start()
         {
@@ -27,7 +32,7 @@ namespace CAVS
             //    VehicleLoader.LoadVehicleData("vehicle1_pos_2.vprp")
             //);
 
-            var liveDisplayBehavior = gameObject.AddComponent<LiveDisplayBehavior>();
+            liveDisplayBehavior = gameObject.AddComponent<LiveDisplayBehavior>();
             liveDisplayBehavior.Initialize(
                 ConnectionFactory.CreateConnection(),
                 lidarSensorName,
@@ -36,6 +41,11 @@ namespace CAVS
 
         }
 
+        private void Update()
+        {
+            liveDisplayBehavior.UpdateCenterOffset(carRepresentation.transform.position);
+            liveDisplayBehavior.UpdateRotationOffset(carRepresentation.transform.rotation.eulerAngles);
+        }
 
     }
 
