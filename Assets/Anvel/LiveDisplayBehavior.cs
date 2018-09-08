@@ -10,6 +10,28 @@ namespace CAVS.Anvel
 
     public class LiveDisplayBehavior : MonoBehaviour
     {
+        [System.Serializable]
+        public class LidarEntry
+        {
+
+            public string sensorName;
+
+            public Color renderColor;
+
+            public LidarEntry(string sensorName, Color renderColor)
+            {
+                this.sensorName = sensorName;
+                this.renderColor = renderColor;
+            }
+
+            public LidarEntry(string sensorName)
+            {
+                this.sensorName = sensorName;
+                this.renderColor = Color.white;
+            }
+
+        }
+
         private ParticleSystem lidarDisplay;
 
         private ParticleSystem.Particle[] particles;
@@ -18,7 +40,7 @@ namespace CAVS.Anvel
 
         private Thread pollingThread;
 
-        private string lidarSensorName;
+        private LidarEntry[] lidarDisplays;
 
         private string vehicleName;
 
@@ -28,7 +50,7 @@ namespace CAVS.Anvel
 
         public void Initialize(AnvelControlService.Client anvelConnection, string lidarSensorName, string vehicleName)
         {
-            this.lidarSensorName = lidarSensorName;
+            this.lidarDisplays = new LidarEntry[] { new LidarEntry(lidarSensorName) };
             this.vehicleName = vehicleName;
             this.anvelConnection = anvelConnection;
             this.centerOffset = Vector3.zero;
@@ -39,9 +61,9 @@ namespace CAVS.Anvel
             pollingThread.Start();
         }
 
-        public void Initialize(AnvelControlService.Client anvelConnection, string lidarSensorName, string vehicleName, Vector3 centerOffset, Vector3 rotationOffset)
+        public void Initialize(AnvelControlService.Client anvelConnection, LidarEntry[] lidarDisplays, string vehicleName, Vector3 centerOffset, Vector3 rotationOffset)
         {
-            this.lidarSensorName = lidarSensorName;
+            this.lidarDisplays = lidarDisplays;
             this.vehicleName = vehicleName;
             this.anvelConnection = anvelConnection;
             this.centerOffset = centerOffset;
@@ -91,38 +113,54 @@ namespace CAVS.Anvel
         {
             try
             {
-                ObjectDescriptor lidarSensor = anvelConnection.GetObjectDescriptorByName(lidarSensorName);
+                ObjectDescriptor[] lidarSensorDescriptions = new ObjectDescriptor[lidarDisplays.Length];
+                for (int i = 0; i < lidarDisplays.Length; i++)
+                {
+                    lidarSensorDescriptions[i] = anvelConnection.GetObjectDescriptorByName(lidarDisplays[i].sensorName);
+                }
                 ObjectDescriptor vehicle = anvelConnection.GetObjectDescriptorByName(vehicleName);
+
+                LidarPoints[] allPoints = new LidarPoints[lidarDisplays.Length];
+                Vector3[] offsets = new Vector3[lidarDisplays.Length];
+                int totalNumberOfPoints = 0;
+
                 while (true)
                 {
-                    var lidarPoints = anvelConnection.GetLidarPoints(lidarSensor.ObjectKey, 0);
+                    Point3 vehiclePosition = anvelConnection.GetPoseAbs(vehicle.ObjectKey).Position;
 
-                    Vector3 offset = Vector3.zero;
-                    if(anvelConnection.GetProperty(lidarSensor.ObjectKey, "Lidar Global Frame") == "true")
+                    totalNumberOfPoints = 0;
+
+                    for (int i = 0; i < lidarDisplays.Length; i++)
                     {
-                        Point3 vehiclePosition = anvelConnection.GetPoseAbs(vehicle.ObjectKey).Position;
-                        offset -= new Vector3((float)vehiclePosition.Y, (float)vehiclePosition.Z, (float)vehiclePosition.X);
+                        allPoints[i] = anvelConnection.GetLidarPoints(lidarSensorDescriptions[i].ObjectKey, 0);
+                        totalNumberOfPoints += allPoints[i].Points.Count;
+                        if (anvelConnection.GetProperty(lidarSensorDescriptions[i].ObjectKey, "Lidar Global Frame") == "true")
+                        {
+                            offsets[i] = new Vector3((float)vehiclePosition.Y, (float)vehiclePosition.Z, (float)vehiclePosition.X);
+                        }
                     }
 
-                    if (lidarPoints.HasScans)
+                    var newParticles = new ParticleSystem.Particle[totalNumberOfPoints];
+                    int particleIndex = 0;
+                    for (int lidarIndex = 0; lidarIndex < lidarDisplays.Length; lidarIndex++)
                     {
-                        var newParticles = new ParticleSystem.Particle[lidarPoints.Points.Count];
-                        for (int i = 0; i < lidarPoints.Points.Count; i++)
+                        for (int pointIndex = 0; pointIndex < allPoints[lidarIndex].Points.Count; pointIndex++)
                         {
-                            newParticles[i] = new ParticleSystem.Particle
+                            newParticles[particleIndex] = new ParticleSystem.Particle
                             {
                                 remainingLifetime = float.MaxValue,
                                 position = ModifiedPositionFromRotationalOffset(new Vector3(
-                                    -(float)lidarPoints.Points[i].Y,
-                                    (float)lidarPoints.Points[i].Z,
-                                    (float)lidarPoints.Points[i].X
-                                ), Vector3.zero, rotationOffset) + centerOffset,
-                                startSize = 1f,
-                                startColor = Color.white
+                                    -(float)allPoints[lidarIndex].Points[pointIndex].Y,
+                                    (float)allPoints[lidarIndex].Points[pointIndex].Z,
+                                    (float)allPoints[lidarIndex].Points[pointIndex].X
+                                ) - offsets[lidarIndex], Vector3.zero, rotationOffset) + centerOffset,
+                                startSize = .5f,
+                                startColor = lidarDisplays[lidarIndex].renderColor
                             };
+                            particleIndex++;
                         }
-                        particles = newParticles;
                     }
+                    particles = newParticles;
                 }
             }
             catch (AnvelException e)

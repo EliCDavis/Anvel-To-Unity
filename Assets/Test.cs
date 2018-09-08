@@ -13,7 +13,7 @@ namespace CAVS
     {
 
         [SerializeField]
-        private string lidarSensorName;
+        private LiveDisplayBehavior.LidarEntry[] lidarSensors;
 
         [SerializeField]
         private string vehicleName;
@@ -35,8 +35,10 @@ namespace CAVS
             liveDisplayBehavior = gameObject.AddComponent<LiveDisplayBehavior>();
             liveDisplayBehavior.Initialize(
                 ConnectionFactory.CreateConnection(),
-                lidarSensorName,
-                vehicleName
+                lidarSensors,
+                vehicleName,
+                Vector3.zero,
+                Vector3.zero
             );
 
         }

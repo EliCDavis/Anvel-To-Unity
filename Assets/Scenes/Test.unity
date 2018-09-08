@@ -395,7 +395,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7a8dfc880a347d49a4854afc6fd15a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lidarSensorName: API 3D Lidar-1
+  lidarSensors:
+  - sensorName: API 3D Lidar-1
+    renderColor: {r: 1, g: 0.043137252, b: 0.71913344, a: 1}
+  - sensorName: API 3D Lidar-2
+    renderColor: {r: 0.3443396, g: 1, b: 0.9006645, a: 1}
   vehicleName: Generic 4x4-1
   carRepresentation: {fileID: 1245545277}
 --- !u!81 &696701293

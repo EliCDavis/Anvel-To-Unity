@@ -73,6 +73,31 @@ namespace CAVS.Anvel.Lidar
             return assetName;
         }
 
+        public uint GetSignature()
+        {
+            return signature;
+        }
+
+        public uint GetReserved()
+        {
+            return reserved;
+        }
+
+        public ulong GetDataOffset()
+        {
+            return dataOffset;
+        }
+
+        public uint GetDataSize()
+        {
+            return dataSize;
+        }
+
+        public uint GetVersion()
+        {
+            return version;
+        }
+
         public DataPoint[] GetDataPoints(){
             return dataPoints;
         }
