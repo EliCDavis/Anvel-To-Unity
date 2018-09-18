@@ -124,12 +124,15 @@ namespace CAVS.Anvel
                 Vector3[] offsets = new Vector3[lidarDisplays.Length];
                 int totalNumberOfPoints = 0;
 
+
+                float lowestPoint =  float.MaxValue;
+                float highestPoint = float.MinValue;
                 while (true)
                 {
                     Point3 vehiclePosition = anvelConnection.GetPoseAbs(vehicle.ObjectKey).Position;
 
                     totalNumberOfPoints = 0;
-
+                    Vector3 lastPos = Vector3.forward*1000000;
                     for (int i = 0; i < lidarDisplays.Length; i++)
                     {
                         allPoints[i] = anvelConnection.GetLidarPoints(lidarSensorDescriptions[i].ObjectKey, 0);
@@ -146,17 +149,46 @@ namespace CAVS.Anvel
                     {
                         for (int pointIndex = 0; pointIndex < allPoints[lidarIndex].Points.Count; pointIndex++)
                         {
-                            newParticles[particleIndex] = new ParticleSystem.Particle
-                            {
-                                remainingLifetime = float.MaxValue,
-                                position = ModifiedPositionFromRotationalOffset(new Vector3(
+                            Vector3 position = ModifiedPositionFromRotationalOffset(new Vector3(
                                     -(float)allPoints[lidarIndex].Points[pointIndex].Y,
                                     (float)allPoints[lidarIndex].Points[pointIndex].Z,
                                     (float)allPoints[lidarIndex].Points[pointIndex].X
-                                ) - offsets[lidarIndex], Vector3.zero, rotationOffset) + centerOffset,
-                                startSize = .5f,
-                                startColor = lidarDisplays[lidarIndex].renderColor
-                            };
+                                ) - offsets[lidarIndex], Vector3.zero, rotationOffset) + centerOffset;
+
+                            if(position.y > highestPoint) 
+                            {
+                                highestPoint = position.y;
+                            }
+
+                            if(position.y < lowestPoint) 
+                            {
+                                lowestPoint = position.y;
+                            }
+
+                            var colorToRender = lidarDisplays[lidarIndex].renderColor;
+                            if(Mathf.Abs(highestPoint - lowestPoint) >0.001f){
+                                float H;
+                                float S;
+                                float V;
+                                Color.RGBToHSV(colorToRender, out H, out S, out V);
+                                var p =  (position.y-lowestPoint) / (highestPoint-lowestPoint);
+                                colorToRender = Color.HSVToRGB(H, p, p);
+                                colorToRender.a = lidarDisplays[lidarIndex].renderColor.a; 
+                            }
+
+                            if ((position - lastPos).sqrMagnitude > .1)
+                            {
+                                newParticles[particleIndex] = new ParticleSystem.Particle
+                                {
+                                    remainingLifetime = float.MaxValue,
+                                    position = position,
+                                    startSize = .5f,
+                                    startColor = colorToRender
+                                };
+                            }
+
+
+                            lastPos = position;
                             particleIndex++;
                         }
                     }
