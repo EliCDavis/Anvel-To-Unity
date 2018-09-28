@@ -1,9 +1,6 @@
 ﻿using AnvelApi;
-
 using System.Threading;
-
 using UnityEngine;
-
 
 namespace CAVS.Anvel
 {
@@ -48,11 +45,11 @@ namespace CAVS.Anvel
 
         private Vector3 rotationOffset;
 
-        public void Initialize(AnvelControlService.Client anvelConnection, string lidarSensorName, string vehicleName)
+        public void Initialize(ClientConnectionToken connectionToken, string lidarSensorName, string vehicleName)
         {
             this.lidarDisplays = new LidarEntry[] { new LidarEntry(lidarSensorName) };
             this.vehicleName = vehicleName;
-            this.anvelConnection = anvelConnection;
+            this.anvelConnection = ConnectionFactory.CreateConnection(connectionToken);
             this.centerOffset = Vector3.zero;
             this.rotationOffset = Vector3.zero;
             particles = new ParticleSystem.Particle[0];
@@ -61,11 +58,11 @@ namespace CAVS.Anvel
             pollingThread.Start();
         }
 
-        public void Initialize(AnvelControlService.Client anvelConnection, LidarEntry[] lidarDisplays, string vehicleName, Vector3 centerOffset, Vector3 rotationOffset)
+        public void Initialize(ClientConnectionToken connectionToken, LidarEntry[] lidarDisplays, string vehicleName, Vector3 centerOffset, Vector3 rotationOffset)
         {
             this.lidarDisplays = lidarDisplays;
             this.vehicleName = vehicleName;
-            this.anvelConnection = anvelConnection;
+            this.anvelConnection = ConnectionFactory.CreateConnection(connectionToken);
             this.centerOffset = centerOffset;
             this.rotationOffset = rotationOffset;
             particles = new ParticleSystem.Particle[0];
@@ -124,13 +121,12 @@ namespace CAVS.Anvel
                 Vector3[] offsets = new Vector3[lidarDisplays.Length];
                 int totalNumberOfPoints = 0;
 
-
                 float lowestPoint =  float.MaxValue;
                 float highestPoint = float.MinValue;
                 while (true)
                 {
                     Point3 vehiclePosition = anvelConnection.GetPoseAbs(vehicle.ObjectKey).Position;
-
+                    // anvelConnection.
                     totalNumberOfPoints = 0;
                     Vector3 lastPos = Vector3.forward*1000000;
                     for (int i = 0; i < lidarDisplays.Length; i++)
@@ -202,7 +198,8 @@ namespace CAVS.Anvel
             }
             catch (System.Exception e)
             {
-                Debug.Log(e.Message);
+                Debug.LogFormat("{0}:{1}", e.GetType(), e.Message);
+                throw;
             }
            
         }

@@ -21,6 +21,9 @@ namespace CAVS
         [SerializeField]
         private GameObject carRepresentation;
 
+        [SerializeField]
+        private GameObject cameraDisplay;
+
         LiveDisplayBehavior liveDisplayBehavior;
 
         // Use this for initialization
@@ -32,14 +35,19 @@ namespace CAVS
             //    VehicleLoader.LoadVehicleData("vehicle1_pos_2.vprp")
             //);
 
+            var token = new ClientConnectionToken();
+
+            LiveCameraDisplay.Build(cameraDisplay, token, "API Camera-1");
+
             liveDisplayBehavior = gameObject.AddComponent<LiveDisplayBehavior>();
             liveDisplayBehavior.Initialize(
-                ConnectionFactory.CreateConnection(),
+                token,
                 lidarSensors,
                 vehicleName,
                 Vector3.zero,
                 Vector3.zero
             );
+
 
         }
 
